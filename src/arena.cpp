@@ -135,11 +135,7 @@ Entity Arena::newBaby(Entity father, Entity mother){
     const float fatherWeight = inheritedCount > 0 ?
         static_cast<float>(mofa_count.second) / inheritedCount : 0.5f;
     const float motherWeight = 1.0f - fatherWeight;
-    baby.color = {
-        static_cast<int>(father.color.R * fatherWeight + mother.color.R * motherWeight),
-        static_cast<int>(father.color.G * fatherWeight + mother.color.G * motherWeight),
-        static_cast<int>(father.color.B * fatherWeight + mother.color.B * motherWeight)
-    };
+    baby.color = fatherWeight > motherWeight? father.color : mother.color;
     return baby;
 }
 
@@ -149,7 +145,7 @@ void Arena::Reproduce(){
         if(entity.x_pos > 60 && entity.x_pos <96 )
             survived_entities.push_back(entity);
     }
-
+    currrentProb = static_cast<float>(survived_entities.size()/1000.0);
     static std::mt19937 generator{std::random_device{}()};
     playground = {};
     for(auto& entity: entities){
@@ -233,6 +229,41 @@ void Arena::Simulate(){
     }
 }
 
-void Arena::Render(){
+void Arena::Render(sf::RenderWindow& window, const sf::Font& font, int generation, int step){
+    const float margin = 16.0f;
+    const float headerHeight = 64.0f;
+    const float cellSize = std::min((800.0f - margin * 2) / X_MAX,
+                                    (800.0f - headerHeight - margin) / Y_MAX);
+    const float boardWidth = cellSize * X_MAX;
+    const float boardHeight = cellSize * Y_MAX;
+    float left = (1000.0f - boardWidth) / 2;
+    window.clear(sf::Color(20, 24, 32));
 
+    sf::Text heading(font, "Generation: " + std::to_string(generation) +
+        "    Step: " + std::to_string(step) + " / " + std::to_string(STEP_PER_GEN) + "     LSR: " + std::to_string(currrentProb), 24);
+    heading.setPosition({left, 16.0f});
+    heading.setFillColor(sf::Color::White);
+    window.draw(heading);
+
+    left = (800.0f - boardWidth) / 2;
+    sf::RectangleShape board({boardWidth, boardHeight});
+    board.setPosition({left, headerHeight});
+    board.setFillColor(sf::Color(35, 42, 52));
+    board.setOutlineThickness(1.0f);
+    board.setOutlineColor(sf::Color(115, 130, 150));
+    window.draw(board);
+
+    const float radius = cellSize * 0.42f;
+    sf::CircleShape circle(radius, 16);
+    circle.setOrigin({radius, radius});
+    for(const auto& entity: entities){
+        circle.setPosition({left + (entity.x_pos + 0.5f) * cellSize,
+                            headerHeight + (entity.y_pos + 0.5f) * cellSize});
+        circle.setFillColor(sf::Color(
+            static_cast<std::uint8_t>(std::clamp(entity.color.R, 0, 255)),
+            static_cast<std::uint8_t>(std::clamp(entity.color.G, 0, 255)),
+            static_cast<std::uint8_t>(std::clamp(entity.color.B, 0, 255))));
+        window.draw(circle);
+    }
+    window.display();
 }

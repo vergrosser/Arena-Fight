@@ -5,6 +5,7 @@
 #include <array>
 #include "Random.h"
 #include <iostream>
+#include <SFML/Graphics.hpp>
 
 
 class Arena{
@@ -16,6 +17,7 @@ class Arena{
     void Simulate();
     Entity newBaby(Entity father, Entity mother);
     void Reproduce();
-    void Render();
+    void Render(sf::RenderWindow& window, const sf::Font& font, int generation, int step);
+    float currrentProb = 0.0f;
 };
 

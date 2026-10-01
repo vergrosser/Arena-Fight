@@ -5,7 +5,7 @@
 #define HIDDEN_NEURONS_COUNT 3
 #define CONNECTION_COUNT 6
 
-#define STEP_PER_GEN 500
+#define STEP_PER_GEN 100
 
 #define POPULATION 1000
 
